@@ -2,3 +2,8 @@ target/
 .DS_Store
 *.swp
 *.swo
+
+# Claude Code — no Claude state in public repos
+.claude/
+CLAUDE.md
+CLAUDE.local.md
