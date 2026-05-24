@@ -1,0 +1,9 @@
+integritas-edge
+Copyright 2026 Furcate Contributors
+
+This product includes software developed at Furcate (https://furcate.xyz).
+
+This product is a Rust client for the Integritas
+(https://integritas.technology) hosted timestamping API. integritas-edge is
+not affiliated with or endorsed by Integritas or the Minima Foundation; it
+is an independent client implementation against the public v2 HTTP API.

@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "integritas-edge"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "Apache-2.0"
+description = "A Rust client for stamping and verifying hashes via the Integritas API — library + CLI."
+homepage = "https://github.com/furcateai/integritas-edge"
+repository = "https://github.com/furcateai/integritas-edge"
+readme = "README.md"
+keywords = ["integritas", "minima", "attestation", "timestamping", "edge"]
+categories = ["api-bindings", "cryptography", "command-line-utilities"]
+authors = ["Furcate Contributors"]
+
+# Mirror minima-attest's shape: a library that downstream code pulls in as
+# `integritas-edge = "0.1"`, plus a thin `integritas-edge` binary for
+# shell-script and cron use. Single version, single changelog, single release.
+[lib]
+name = "integritas_edge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "integritas-edge"
+path = "src/bin/cli.rs"
+required-features = ["cli"]
+
+[features]
+# Default is library-only.
+default = []
+cli = ["dep:clap", "dep:anyhow", "dep:tracing-subscriber", "tokio/rt-multi-thread", "tokio/macros"]
+# `furcate` opts into the trait impls (`ReceiptSink`, `Attester`) so the
+# Furcate inference kernel can pick this crate up as a parallel sink
+# alongside `minima-attest`. Off by default — standalone Integritas users
+# get a thinner dep graph.
+furcate = ["dep:furcate-inference-core", "dep:async-trait", "dep:blake3"]
+
+[dependencies]
+# --- HTTP transport ------------------------------------------------------
+# Unlike `minima-attest` (which hand-rolls HTTP/1.1 over TcpStream to work
+# around Minima's case-sensitive header parser), Integritas is a normal
+# REST API behind a standard TLS reverse proxy. reqwest with rustls is the
+# right tool here — no special handling needed.
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+tokio   = { version = "1", default-features = false, features = ["sync", "time", "io-util"] }
+
+# --- JSON / serde --------------------------------------------------------
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# --- Hashing -------------------------------------------------------------
+# Integritas stamps SHA3-256 hashes. We expose helpers but also accept a
+# pre-computed hash so callers can use whatever digest they already have.
+sha3 = "0.10"
+hex  = "0.4"
+
+# --- Errors / logging ----------------------------------------------------
+thiserror = "1"
+tracing   = "0.1"
+
+# --- CLI-only (gated) ----------------------------------------------------
+clap = { version = "4", features = ["derive", "env"], optional = true }
+anyhow = { version = "1", optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], optional = true }
+
+# --- Furcate-only (gated) -----------------------------------------------
+# Path dep during the local-development phase. Will become a crates.io
+# version pin once the kernel is published.
+furcate-inference-core = { path = "../furcate-inference/crates/furcate-inference-core", optional = true }
+async-trait = { version = "0.1", optional = true }
+blake3      = { version = "1", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "io-util"] }
+wiremock = "0.6"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery  = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+module_name_repetitions = "allow"
