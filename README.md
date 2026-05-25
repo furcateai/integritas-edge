@@ -12,25 +12,6 @@ integritas-edge check  0xDEAD...BEEF        # idempotency probe
 
 No Minima node, no Pi, no Furcate required. Anything that can speak HTTPS and has an Integritas API key can use this crate.
 
----
-
-## Where it sits
-
-```
-github.com/furcateai/
-├── furcate-protocol                    wire-format specs + schemas
-├── furcate-inference                   edge inference kernel
-├── furcate-mesh                        LAN peer fabric for edge nodes
-├── minima-attest                       Rust client for anchoring hashes on a local Minima node
-├── integritas-edge   ← you are here    Rust client for the Integritas hosted stamping API
-├── tenzro-edge                         runtime for participating in the Tenzro Network
-├── prvnz-edge                          runtime for issuing PRVNZ Digital Product Passports
-├── furcate-pi-hat                      Pi 5 HAT hardware support (GPIO, 1-Wire, OPC UA triggers)
-└── furcate-pi-minima                   supervisor for running a Minima full node on a Pi
-```
-
-`integritas-edge` is the hosted-API sibling to [`minima-attest`](https://github.com/furcateai/minima-attest). Both anchor data on Minima; they differ in where you place trust and what infrastructure you have to run.
-
 ## What it does — and why
 
 [Integritas](https://integritas.technology) ([previous URL](https://integritas.minima.global)) is a hosted timestamping service that takes SHA3-256 hashes, mints an NFT on Minima L1 against each one, and returns a verifiable proof (on-chain reference + PDF report). It's API-key authenticated and exposes three v2 endpoints — `stamp`, `verify`, `check`.
